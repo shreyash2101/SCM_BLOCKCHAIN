@@ -31,6 +31,8 @@ contract ProductManagement {
 
 contract ChangeOwnership {
     ProductManagement private pm;
+    mapping(bytes32 => address[]) public partHistory;
+    mapping(bytes32 => address[]) public productHistory;
 
     constructor(address pm_addr) public {
         pm = ProductManagement(pm_addr);
@@ -43,6 +45,24 @@ contract ChangeOwnership {
 
     event TransferPartOwnership(bytes32 indexed p, address indexed account);
     event TransferProductOwnership(bytes32 indexed p, address indexed account);
+
+    function getPartHistory(string serial_number)
+        public
+        view
+        returns (address[])
+    {
+        bytes32 p_hash = keccak256(serial_number);
+        return (partHistory[p_hash]);
+    }
+
+    function getProductHistory(string serial_number)
+        public
+        view
+        returns (address[])
+    {
+        bytes32 p_hash = keccak256(serial_number);
+        return (productHistory[p_hash]);
+    }
 
     function getPartList(string serial_number)
         private
@@ -79,6 +99,7 @@ contract ChangeOwnership {
                 "Part was not made by requester"
             );
             CurrentPartOwner[p_hash] = msg.sender;
+            partHistory[p_hash].push(msg.sender);
             emit TransferPartOwnership(p_hash, msg.sender);
         } else if (op_type == uint256(OperationType.Product)) {
             (manufacturer, , , , ) = pm.products(p_hash);
@@ -98,6 +119,8 @@ contract ChangeOwnership {
                 );
             }
             CurrentProductOwner[p_hash] = msg.sender;
+            productHistory[p_hash].push(msg.sender);
+
             emit TransferProductOwnership(p_hash, msg.sender);
         }
     }
@@ -113,6 +136,8 @@ contract ChangeOwnership {
                 "Part is not owned by requester"
             );
             CurrentPartOwner[p_hash] = to;
+            partHistory[p_hash].push(to);
+
             emit TransferPartOwnership(p_hash, to);
         } else if (op_type == uint256(OperationType.Product)) {
             require(
@@ -120,21 +145,29 @@ contract ChangeOwnership {
                 "Product is not owned by requester"
             );
             CurrentProductOwner[p_hash] = to;
+            productHistory[p_hash].push(to);
+
             emit TransferProductOwnership(p_hash, to);
             //Change part ownership too
             bytes32[5] memory part_list = getPartList(serial_number);
             for (uint256 i = 0; i < part_list.length; i++) {
                 CurrentPartOwner[part_list[i]] = to;
+                partHistory[part_list[i]].push(to);
+
                 emit TransferPartOwnership(part_list[i], to);
             }
         }
     }
-    function currentOwner (uint256 op_type,string serial_number) public view returns (address){
+
+    function currentOwner(uint256 op_type, string serial_number)
+        public
+        view
+        returns (address)
+    {
         bytes32 p_hash = keccak256(serial_number);
-        if(op_type == uint256(OperationType.Part)){
+        if (op_type == uint256(OperationType.Part)) {
             return CurrentPartOwner[p_hash];
-        }
-        else if(op_type == uint256(OperationType.Product)){
+        } else if (op_type == uint256(OperationType.Product)) {
             return CurrentProductOwner[p_hash];
         }
     }

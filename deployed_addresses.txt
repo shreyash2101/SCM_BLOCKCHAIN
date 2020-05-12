@@ -1,4 +1,8 @@
+
+
+
+
 Attempting to deploy Product Management contract from account 0xc666E04444B69FC164D6c6DEe382A027E334675f
-Contract deployed to 0xE56B51DBAaa0BD8d50009876687311098D5271a0
+Contract deployed to 0xf9689b275ffe8bd4D6eDa327C37f7438F9094910
 Attempting to deploy Change Ownership contract from account 0xc666E04444B69FC164D6c6DEe382A027E334675f
-Contract deployed to 0x31A3887da35472afdbd44D60D3a8575a94A7a0C8
+Contract deployed to 0x5Fdd44313f6d0a1a4A7554BB513E31eda008B354
